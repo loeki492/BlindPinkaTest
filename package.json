@@ -1,0 +1,14 @@
+{
+  "name": "pinkatest",
+  "version": "0.1.0",
+  "description": "Blind test musical en page web à partir de playlists Deezer, avec mélange de catégories",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
