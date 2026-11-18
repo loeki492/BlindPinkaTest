@@ -1,14 +1,6 @@
 // Accès à l'API Deezer depuis le navigateur.
-//
-// L'API Deezer n'envoie pas d'en-têtes CORS : un fetch() direct depuis une page web est bloqué.
-// Elle accepte en revanche le JSONP (paramètres output=jsonp&callback=...) : la réponse est chargée
-// comme un script, ce qui n'est pas soumis au CORS. C'est ce qui permet d'héberger le jeu comme
-// simple page statique (GitHub Pages), sans serveur.
-//
-// Secours : si le JSONP échoue et que la page est servie par server.js (npm start),
-// les appels passent par le relais /api/deezer/... du serveur.
-//
-// Utilisable dans le navigateur (window.Deezer) et dans Node (tests, avec un transport simulé).
+
+
 (function (root) {
   'use strict';
 
@@ -28,7 +20,6 @@
 
   let jsonpSeq = 0;
 
-  // Appel JSONP : injecte <script src="https://api.deezer.com/...&output=jsonp&callback=X">
   function jsonpTransport(path, { base = API, timeout = 15000 } = {}) {
     return new Promise((resolve, reject) => {
       const cb = `__pinkatest_cb_${Date.now()}_${jsonpSeq++}`;
@@ -73,14 +64,12 @@
     });
   }
 
-  // Appel via le relais du serveur local (server.js)
   async function proxyTransport(path) {
     const res = await fetch(`api/deezer${path}`);
     if (!res.ok) throw new DeezerError(`Le relais a répondu HTTP ${res.status}`);
     return res.json();
   }
 
-  // Transport automatique : JSONP d'abord, relais local en secours
   function autoTransport({ base = API } = {}) {
     let mode = 'jsonp';
     let proxyChecked = null;
@@ -108,14 +97,12 @@
 
   // ---------- Outils ----------
 
-  // Accepte un ID ("1234567") ou un lien ("https://www.deezer.com/fr/playlist/1234567?...")
   function parsePlaylistId(input) {
     const s = String(input == null ? '' : input).trim();
     const m = s.match(/playlist\/(\d+)/) || s.match(/^(\d+)$/);
     return m ? Number(m[1]) : null;
   }
 
-  // Mélange de Fisher-Yates (uniforme)
   function shuffle(arr) {
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -141,7 +128,6 @@
       return data;
     }
 
-    // Infos + titres jouables d'une playlist (pagination par index)
     async function getPlaylist(id) {
       const hit = cache.get(id);
       if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.value;
@@ -178,7 +164,6 @@
       return value;
     }
 
-    // Fusionne les playlists, retire les doublons, mélange, garde `rounds` titres
     async function buildGame(ids, rounds) {
       const unique = [...new Set(ids.map(parsePlaylistId).filter(Boolean))];
       if (!unique.length) throw new DeezerError('Aucune playlist sélectionnée');
@@ -195,7 +180,6 @@
       };
     }
 
-    // URL d'extrait fraîche (celles de Deezer contiennent un jeton qui expire)
     async function getPreview(trackId) {
       const t = await call(`/track/${trackId}`);
       if (!t.preview) throw new DeezerError("Pas d'extrait disponible pour ce titre");

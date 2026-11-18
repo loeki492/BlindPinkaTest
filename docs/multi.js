@@ -1,12 +1,4 @@
-// Pinkatest — mode multijoueur
-//
-// Principe :
-//  - L'hôte crée un salon (code à 4 caractères) avec ses playlists et réglages. Il joue aussi.
-//  - Les joueurs rejoignent avec le code et un pseudo, sans compte.
-//  - Seul l'appareil de l'hôte connaît la liste des titres. Il envoie à chaque manche
-//    uniquement l'URL de l'extrait audio ; chaque appareil joue le son de son côté.
-//  - Les propositions sont envoyées à l'hôte, qui les vérifie et attribue les points
-//    (plus on trouve vite, plus on marque). La réponse n'est diffusée qu'à la révélation.
+
 (function () {
   'use strict';
 
@@ -16,9 +8,9 @@
 
   const NAME_KEY = 'pinkatest.name';
   const ID_KEY = 'pinkatest.playerId';
-  const READY_TIMEOUT_MS = 6000;   // attente max du chargement de l'extrait chez tout le monde
-  const REVEAL_GRACE_MS = 400;     // marge pour les réponses envoyées à la dernière seconde
-  const HOST_LOST_DELAY_MS = 5000; // délai avant de considérer que l'hôte est parti
+  const READY_TIMEOUT_MS = 6000;
+  const REVEAL_GRACE_MS = 400;
+  const HOST_LOST_DELAY_MS = 5000; 
   const GUESS_MIN_INTERVAL_MS = 250;
   const HOST_MESSAGES = new Set(['lobby', 'welcome', 'start', 'round', 'go', 'found', 'miss', 'reveal', 'end', 'closed']);
 
@@ -30,17 +22,17 @@
   let isHost = false;
   let hostId = null;
   let joinedAt = 0;
-  let members = [];          // connectés : [{ id, name, host }]
-  let names = {};            // id -> pseudo (garde aussi les joueurs partis)
-  let scores = {};           // id -> points (fournis par l'hôte)
-  let status = {};           // id -> { title, artist } pour la manche en cours
-  let phase = 'idle';        // idle | lobby | waiting | loading | playing | reveal | end
+  let members = [];
+  let names = {};
+  let scores = {};
+  let status = {};
+  let phase = 'idle';
   let info = { playlists: [], rounds: 0, duration: 20 };
-  let cur = null;            // manche en cours côté joueur
+  let cur = null;
   let timerRaf = 0;
   let hostLostTimer = null;
   let welcomeResolve = null;
-  let H = null;              // état réservé à l'hôte
+  let H = null;
 
   function sessionId() {
     try {
@@ -58,14 +50,12 @@
 
   // ---------- Envoi des messages ----------
 
-  // Message de l'hôte vers tout le monde (l'hôte le traite aussi pour lui-même)
   function broadcast(msg) {
     const full = { ...msg, from: me.id };
     if (room) room.send(full);
     handle(full);
   }
 
-  // Message d'un joueur vers l'hôte
   function toHost(msg) {
     const full = { ...msg, from: me.id };
     if (isHost) handle(full);
@@ -74,8 +64,6 @@
 
   // ---------- Son ----------
 
-  // Sur mobile (surtout iPhone), un son ne peut démarrer sans geste de l'utilisateur.
-  // On "débloque" la balise audio pendant le clic sur Créer / Rejoindre.
   let silentUrl = null;
   function unlockAudio() {
     try {
@@ -97,7 +85,6 @@
     } catch { /* sans importance */ }
   }
 
-  // ---------- Salon : créer / rejoindre / quitter ----------
 
   function mpError(message) { P.showError($('mp-error'), message); }
 
@@ -332,7 +319,6 @@
       }
       if (!preview) return hostEnd();
       H.index++;
-      // Joueurs attendus pour cette manche (ceux qui arrivent pendant le chargement jouent la suivante)
       const expected = new Set(members.map((m) => m.id));
       expected.add(me.id);
       H.current = { track, expected, ready: new Set(), found: {}, startedAt: 0, revealed: false };
@@ -349,7 +335,6 @@
     maybeGo();
   }
 
-  // Lance la manche dès que tous les joueurs connectés ont chargé l'extrait
   function maybeGo() {
     if (!H || !H.current || H.current.startedAt) return;
     const online = new Set(members.map((m) => m.id));
@@ -382,7 +367,6 @@
       broadcast({ t: 'miss', to: msg.from, seq: msg.seq });
       return;
     }
-    // Points : 100 par élément trouvé immédiatement, 50 au tout dernier moment
     const elapsed = Date.now() - H.current.startedAt;
     const remaining = Math.max(0, 1 - elapsed / (H.duration * 1000));
     const perItem = Math.round(50 + 50 * remaining);
@@ -395,7 +379,6 @@
       t: 'found', index: H.index, to: msg.from, seq: msg.seq,
       title: newTitle, artist: newArtist, points: gained, scores, status: roundStatus(),
     });
-    // Tout le monde a tout trouvé : on révèle sans attendre la fin du chrono
     const everyoneDone = members
       .filter((m) => H.current.expected.has(m.id))
       .every((m) => {
@@ -436,7 +419,6 @@
     sendLobby();
   }
 
-  // ---------- Joueurs (et hôte) : affichage ----------
 
   function onWelcome(msg) {
     if (msg.to !== me.id) return;
@@ -563,7 +545,7 @@
 
   function onReveal(msg) {
     if (!cur || cur.index !== msg.index) {
-      // Arrivé en cours de manche : on affiche quand même la réponse
+
       cur = { index: msg.index, total: msg.total, duration: info.duration, guesses: new Map(), seq: 0 };
       P.show('mgame');
       $('m-round').textContent = `Manche ${msg.index} / ${msg.total}`;
@@ -655,7 +637,6 @@
     $('m-feed').prepend(li);
   }
 
-  // Joueurs triés par score (les joueurs partis restent dans le classement)
   function ranking() {
     const ids = new Set([...members.map((m) => m.id), ...Object.keys(scores)]);
     const online = new Set(members.map((m) => m.id));
@@ -666,7 +647,6 @@
   }
 
   function renderPlayers(gained) {
-    // Liste du salon d'attente
     const lobbyList = $('lobby-players');
     lobbyList.innerHTML = '';
     for (const m of members) {
@@ -676,7 +656,6 @@
     }
     $('lobby-count').textContent = `${members.length} joueur(s)`;
 
-    // Tableau des scores en partie
     const board = $('m-board');
     board.innerHTML = '';
     for (const p of ranking()) {
@@ -778,7 +757,6 @@
     if ($('join-code').value !== v) $('join-code').value = v;
   });
 
-  // L'hôte qui ferme l'onglet prévient les joueurs
   window.addEventListener('pagehide', () => {
     if (isHost && room) { try { room.send({ t: 'closed', from: me.id }); } catch { /* ignore */ } }
   });

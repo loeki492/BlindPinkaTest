@@ -1,12 +1,3 @@
-// Pinkatest — serveur local (facultatif)
-//
-// Le jeu fonctionne comme simple page web (dossier docs/, publié par GitHub Pages) :
-// ce serveur n'est utile que pour jouer en local, ou en secours si l'appel direct à Deezer
-// (JSONP) ne fonctionnait plus. Aucune dépendance : Node.js 18 ou plus suffit.
-//
-//   GET /            -> fichiers du dossier docs/
-//   GET /api/health  -> indique à la page que le relais est disponible
-//   GET /api/deezer/<chemin>?<paramètres> -> relaie l'appel vers https://api.deezer.com/<chemin>
 
 const http = require('node:http');
 const fs = require('node:fs');

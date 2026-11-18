@@ -1,8 +1,5 @@
-// Comparaison tolérante entre la réponse du joueur et le titre / l'artiste attendu.
-// Utilisable dans le navigateur (window.Match) et dans Node (pour les tests).
+
 (function (root) {
-  // Met en forme un texte pour la comparaison :
-  // minuscules, sans accents, sans "(Remastered)", "[Live]", "- 2011 Remaster", "feat. X", ponctuation…
   function normalize(s) {
     return String(s || '')
       .toLowerCase()
@@ -32,16 +29,13 @@
     return prev[b.length];
   }
 
-  // true si la réponse est suffisamment proche de la cible
   function isMatch(guess, target) {
     const g = normalize(guess);
     const t = normalize(target);
     if (!g || !t) return false;
     if (g === t) return true;
-    // Tolérance aux fautes de frappe : ~1 erreur pour 5 caractères
     const maxLen = Math.max(g.length, t.length);
     if (maxLen >= 4 && 1 - levenshtein(g, t) / maxLen >= 0.8) return true;
-    // Réponse partielle acceptée si elle couvre l'essentiel de la cible (titres très longs)
     if (g.length >= 4 && t.includes(g) && g.length / t.length >= 0.6) return true;
     return false;
   }

@@ -1,15 +1,4 @@
-// Couche réseau du multijoueur : un "salon" = un canal temps réel partagé.
-//
-// Deux implémentations avec la même interface :
-//  - Supabase Realtime (Broadcast pour les messages, Presence pour la liste des connectés) ;
-//  - BroadcastChannel du navigateur (onglets d'un même navigateur), utilisée pour les tests
-//    en ajoutant ?transport=local à l'adresse.
-//
-// Interface :
-//   const room = await Net.join({ code, me: { id, name, host }, onMessage(msg), onMembers(list) });
-//   room.send(msg);   // diffusé à tous les AUTRES membres du salon
-//   room.close();
-//   onMembers reçoit la liste [{ id, name, host }] des membres connectés (soi compris).
+
 (function (root) {
   'use strict';
 
@@ -135,7 +124,6 @@
     return useLocal() ? joinLocal(opts) : joinSupabase(opts);
   }
 
-  // Code de salon : 4 caractères sans ambiguïté (pas de 0/O, 1/I/L)
   const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
   function randomCode(len = 4) {
     let s = '';

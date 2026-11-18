@@ -1,14 +1,9 @@
-/* ==========================================================================
-   Pinkatest — thème pastel (rose doux, lavande, menthe)
-   ========================================================================== */
 
 :root {
-  /* ---- Image de fond ----
-     Dépose ton image dans docs/images/background.jpg (ou change le chemin ci-dessous).
-     Si le fichier n'existe pas, le dégradé --bg-default est utilisé automatiquement. */
+
   --bg-image: url("images/background.jpg");
   --bg-default: linear-gradient(160deg, #fff7fb 0%, #ffe9f3 35%, #f4f0ff 65%, #e8fbff 100%);
-  --bg-veil: rgba(255, 250, 253, 0.45); /* voile clair par-dessus l'image, pour la lisibilité */
+  --bg-veil: rgba(255, 250, 253, 0.45);
 
   /* ---- Couleurs ---- */
   --text: #5b4057;
@@ -46,7 +41,6 @@ body {
   background: #fff7fb;
 }
 
-/* Fond fixe : voile clair + image (si présente) + dégradé par défaut */
 body::before {
   content: "";
   position: fixed;

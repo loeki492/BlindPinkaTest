@@ -15,7 +15,6 @@
     try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* stockage indisponible : pas grave */ }
   }
 
-  // Client Deezer (JSONP direct, relais local en secours) — voir deezer.js
   const deezer = Deezer.createClient(Deezer.autoTransport());
 
   // ---------- Écrans ----------
@@ -135,7 +134,6 @@
     }
   });
 
-  // Playlists prédéfinies (docs/presets.json)
   async function loadPresets() {
     let presets = [];
     try {
